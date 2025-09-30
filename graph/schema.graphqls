@@ -1,0 +1,22 @@
+type Egg {
+  id: ID!
+  type: String!
+  price: Float!
+  quantityAvailable: Int!
+  description: String
+}
+
+type PurchaseResult {
+  success: Boolean!
+  message: String!
+  remainingQuantity: Int!
+}
+
+type Query {
+  eggs: [Egg!]!
+  egg(id: ID!): Egg
+}
+
+type Mutation {
+  purchaseEgg(id: ID!, quantity: Int!): PurchaseResult!
+}
