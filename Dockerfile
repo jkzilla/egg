@@ -14,7 +14,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # ---- Backend Build Stage ----
-FROM golang:1.22-alpine AS backend-builder
+FROM golang:1.25-alpine AS backend-builder
 
 # Install git for go modules
 RUN apk add --no-cache git

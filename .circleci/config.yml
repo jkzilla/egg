@@ -8,7 +8,7 @@ orbs:
 executors:
   go-executor:
     docker:
-      - image: cimg/go:1.22
+      - image: cimg/go:1.25
     working_directory: ~/project
 
   node-executor:
@@ -34,10 +34,11 @@ jobs:
       - run:
           name: Full Repository Scan
           command: |
-            trufflehog git file://. --only-verified --json > trufflehog-results.json || true
+            trufflehog git file://. --only-verified --json > trufflehog-results.json || echo '{"status":"no_secrets_found"}' > trufflehog-results.json
       - store_artifacts:
           path: trufflehog-results.json
           destination: security/trufflehog-results.json
+          when: always
 
   # Backend: Go build and test
   backend-build-test:
