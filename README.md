@@ -229,10 +229,36 @@ The frontend uses Vite for fast development with hot module replacement:
 
 ```bash
 cd frontend
-npm run dev      # Start dev server
-npm run build    # Build for production
-npm run preview  # Preview production build
-npm run lint     # Run ESLint
+npm run dev          # Start dev server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+npm run test:e2e     # Run E2E tests (headless)
+npm run test:e2e:ui  # Run E2E tests with UI
+npm run test:e2e:headed  # Run E2E tests in browser
+```
+
+### E2E Testing
+
+The project includes five comprehensive UI tests using Playwright:
+
+1. **Page Load Test** - Verifies the page loads and displays egg products
+2. **Add to Cart Test** - Tests adding items to the shopping cart
+3. **Cart Display Test** - Validates cart sidebar opens and shows items
+4. **Quantity Update Test** - Tests updating item quantities in cart
+5. **Clear Cart Test** - Verifies clearing all items from cart
+
+**Setup E2E Tests:**
+```bash
+cd frontend
+npm install
+npx playwright install chromium
+npm run test:e2e
+```
+
+**View Test Report:**
+```bash
+npx playwright show-report
 ```
 
 ## API Endpoints
