@@ -4,14 +4,52 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/jkzilla/egg/graph"
 	"github.com/jkzilla/egg/graph/model"
+	"github.com/rs/cors"
 )
 
 const defaultPort = "8080"
+
+// corsMiddleware adds CORS headers to allow frontend access
+func corsMiddleware(next http.Handler) http.Handler {
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+	return c.Handler(next)
+}
+
+// spaHandler implements the http.Handler interface for serving a SPA
+type spaHandler struct {
+	staticPath string
+	indexPath  string
+}
+
+func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	path := filepath.Join(h.staticPath, r.URL.Path)
+	
+	// Check if file exists
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		// File does not exist, serve index.html
+		http.ServeFile(w, r, filepath.Join(h.staticPath, h.indexPath))
+		return
+	} else if err != nil {
+		// Other error
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	// File exists, serve it
+	http.FileServer(http.Dir(h.staticPath)).ServeHTTP(w, r)
+}
 
 // startServer runs the GraphQL API server
 func startServer() {
@@ -55,10 +93,17 @@ func startServer() {
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	// GraphQL endpoints
+	http.Handle("/graphql", corsMiddleware(srv))
+	http.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 
-	log.Printf("Connect to http://localhost:%s/ for GraphQL playground", port)
+	// Serve static files from frontend/dist
+	spa := spaHandler{staticPath: "frontend/dist", indexPath: "index.html"}
+	http.Handle("/", spa)
+
+	log.Printf("Server starting on http://localhost:%s", port)
+	log.Printf("GraphQL playground: http://localhost:%s/playground", port)
+	log.Printf("Frontend: http://localhost:%s/", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
