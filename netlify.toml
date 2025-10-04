@@ -10,6 +10,12 @@
   # Directory with the built files to deploy
   publish = "dist/"
 
+[functions]
+  # Directory with serverless functions
+  directory = "../netlify/functions/"
+  # Uncomment to set custom Node version for functions
+  # node_bundler = "esbuild"
+
 [build.environment]
   # Node version
   NODE_VERSION = "20"
@@ -17,11 +23,13 @@
   # GraphQL API endpoint - update this to your production backend URL
   VITE_GRAPHQL_ENDPOINT = "https://your-backend-url.com/graphql"
 
-# Redirect all requests to index.html for SPA routing
+# Redirect all requests to index.html for SPA routing (except functions)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
+  conditions = {Role = ["public"]}
 
 # Headers for security
 [[headers]]

@@ -329,6 +329,46 @@ VITE_GRAPHQL_ENDPOINT=https://test.com/graphql npm run build
 
 ---
 
+## Netlify Functions (Optional)
+
+The project includes serverless functions in `netlify/functions/`:
+
+- **hello.js** - Example function
+- **graphql-proxy.js** - Proxy GraphQL requests (hides backend URL)
+- **health.js** - Health check endpoint
+
+### Using Functions
+
+```bash
+# Test locally
+netlify dev
+
+# Access functions at:
+# http://localhost:8888/.netlify/functions/hello
+# http://localhost:8888/.netlify/functions/health
+```
+
+### GraphQL Proxy Setup
+
+To use the GraphQL proxy instead of direct backend access:
+
+1. Set backend URL:
+   ```bash
+   netlify env:set BACKEND_GRAPHQL_URL "https://your-backend.com/graphql"
+   ```
+
+2. Update `frontend/src/main.tsx`:
+   ```typescript
+   const client = new ApolloClient({
+     uri: '/.netlify/functions/graphql-proxy',  // Use proxy
+     cache: new InMemoryCache(),
+   })
+   ```
+
+See `netlify/functions/README.md` for full documentation.
+
+---
+
 ## Next Steps
 
 1. ✅ Deploy backend to Render/Railway/Fly.io
@@ -339,6 +379,7 @@ VITE_GRAPHQL_ENDPOINT=https://test.com/graphql npm run build
 6. ✅ Test the live site
 7. ✅ Set up custom domain (optional)
 8. ✅ Enable continuous deployment
+9. ✅ (Optional) Configure Netlify Functions
 
 ---
 
