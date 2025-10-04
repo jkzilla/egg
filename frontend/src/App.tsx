@@ -65,7 +65,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
       <Header />
-      
+
       {/* Cart Button */}
       <button
         onClick={() => setShowCart(!showCart)}

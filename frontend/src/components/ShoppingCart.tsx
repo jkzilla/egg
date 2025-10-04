@@ -138,7 +138,7 @@ export default function ShoppingCart({
                   className="bg-gray-50 rounded-lg p-4 flex items-center gap-4"
                 >
                   <div className="text-4xl">🥚</div>
-                  
+
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-800">
                       {item.egg.type}
@@ -146,7 +146,7 @@ export default function ShoppingCart({
                     <p className="text-sm text-gray-600">
                       ${item.egg.price.toFixed(2)} each
                     </p>
-                    
+
                     <div className="flex items-center gap-2 mt-2">
                       <input
                         type="number"

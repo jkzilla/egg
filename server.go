@@ -34,7 +34,7 @@ type spaHandler struct {
 
 func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := filepath.Join(h.staticPath, r.URL.Path)
-	
+
 	// Check if file exists
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -46,7 +46,7 @@ func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	// File exists, serve it
 	http.FileServer(http.Dir(h.staticPath)).ServeHTTP(w, r)
 }

@@ -1,5 +1,7 @@
 # Hailey's Garden - Egg Shop
 
+[![CircleCI](https://circleci.com/gh/jkzilla/egg.svg?style=svg)](https://circleci.com/gh/jkzilla/egg)
+
 A full-stack application for selling farm-fresh eggs, featuring a Go GraphQL backend and a modern React TypeScript frontend with a beautiful, responsive UI.
 
 ## Features
@@ -10,6 +12,8 @@ A full-stack application for selling farm-fresh eggs, featuring a Go GraphQL bac
 - 🎨 **Modern UI**: Beautiful, responsive design with TailwindCSS
 - 🚀 **GraphQL API**: Efficient data fetching with Apollo Client
 - 🐳 **Docker Support**: Easy deployment with multi-stage builds
+- 🔒 **Security Scanning**: TruffleHog integration for secret detection
+- 🔄 **CI/CD Pipeline**: Automated testing and deployment with CircleCI
 
 ## Tech Stack
 
@@ -237,6 +241,105 @@ npm run lint     # Run ESLint
 - `/graphql` - GraphQL API endpoint
 - `/playground` - GraphQL Playground (interactive API explorer)
 
+## CI/CD Pipeline
+
+### CircleCI Integration
+
+This project uses CircleCI for continuous integration and deployment. The pipeline includes:
+
+**Automated Checks:**
+- 🔒 Security scanning with TruffleHog
+- 🧪 Backend unit tests with coverage reports
+- ⚛️ Frontend build and linting
+- 🔗 Integration tests for GraphQL API
+- 🐳 Docker image builds and testing
+
+**Pipeline Stages:**
+1. **Security Scan** - Detects secrets and credentials
+2. **Parallel Builds** - Backend and frontend build simultaneously
+3. **Integration Tests** - End-to-end API validation
+4. **Docker Build** - Multi-stage container build (main/master/develop only)
+
+**Setup CircleCI:**
+1. Connect your repository at [circleci.com](https://circleci.com/)
+2. Add Docker Hub credentials (optional):
+   - `DOCKER_USERNAME`
+   - `DOCKER_PASSWORD`
+3. Pipeline runs automatically on every push and PR
+
+See [`.circleci/README.md`](.circleci/README.md) for detailed configuration documentation.
+
+## Security
+
+### Secret Scanning with TruffleHog
+
+This project uses [TruffleHog](https://github.com/trufflesecurity/trufflehog) to scan for accidentally committed secrets, API keys, and credentials.
+
+#### Installation
+
+Install TruffleHog using the provided script:
+
+```bash
+./scripts/install-trufflehog.sh
+```
+
+Or install manually:
+
+**macOS (Homebrew):**
+```bash
+brew install trufflehog
+```
+
+**Linux/macOS (curl):**
+```bash
+curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+```
+
+#### Manual Scanning
+
+Scan the entire repository:
+
+```bash
+trufflehog git file://. --only-verified
+```
+
+Scan since last commit:
+
+```bash
+trufflehog git file://. --since-commit HEAD --only-verified
+```
+
+#### Pre-commit Hooks
+
+Set up automatic scanning before each commit:
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Install the hooks
+pre-commit install
+
+# Run manually on all files
+pre-commit run --all-files
+```
+
+#### GitHub Actions
+
+TruffleHog runs automatically on:
+- Every push to `main`, `master`, or `develop` branches
+- Every pull request
+- Manual workflow dispatch
+
+View results in the **Actions** tab on GitHub.
+
+#### Configuration
+
+TruffleHog settings are in `.trufflehog.yaml`:
+- Excluded paths (node_modules, dist, etc.)
+- Excluded file extensions
+- Verification settings
+
 ## Contributing
 
 1. Fork the repository
@@ -244,6 +347,8 @@ npm run lint     # Run ESLint
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+**Note:** All commits are scanned for secrets. Ensure no sensitive data is committed.
 
 ## License
 

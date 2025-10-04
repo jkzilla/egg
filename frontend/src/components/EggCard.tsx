@@ -34,14 +34,14 @@ export default function EggCard({ egg, onAddToCart }: EggCardProps) {
       <div className="bg-gradient-to-br from-amber-100 to-orange-200 h-48 flex items-center justify-center">
         <div className="text-8xl">🥚</div>
       </div>
-      
+
       <div className="p-6">
         <h3 className="text-xl font-bold text-gray-800 mb-2">{egg.type}</h3>
-        
+
         {egg.description && (
           <p className="text-gray-600 text-sm mb-4">{egg.description}</p>
         )}
-        
+
         <div className="flex items-center justify-between mb-4">
           <span className="text-2xl font-bold text-amber-600">
             ${egg.price.toFixed(2)}
@@ -61,7 +61,7 @@ export default function EggCard({ egg, onAddToCart }: EggCardProps) {
               >
                 <Minus className="w-4 h-4" />
               </button>
-              
+
               <input
                 type="number"
                 min="1"
@@ -73,7 +73,7 @@ export default function EggCard({ egg, onAddToCart }: EggCardProps) {
                 }}
                 className="w-16 text-center border border-gray-300 rounded-lg py-2"
               />
-              
+
               <button
                 onClick={incrementQuantity}
                 className="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition-colors"
