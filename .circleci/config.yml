@@ -30,10 +30,12 @@ jobs:
       - run:
           name: Scan for Secrets
           command: |
+            export TRUFFLEHOG_API_KEY="${TRUFFLEHOG_API_TOKEN}"
             trufflehog git file://. --since-commit HEAD~1 --only-verified --fail || echo "No secrets found"
       - run:
           name: Full Repository Scan
           command: |
+            export TRUFFLEHOG_API_KEY="${TRUFFLEHOG_API_TOKEN}"
             trufflehog git file://. --only-verified --json > trufflehog-results.json || echo '{"status":"no_secrets_found"}' > trufflehog-results.json
       - store_artifacts:
           path: trufflehog-results.json
