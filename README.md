@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/jkzilla/egg.svg?style=svg)](https://circleci.com/gh/jkzilla/egg)
 
-A full-stack application for selling farm-fresh eggs, featuring a Go GraphQL backend and a modern React TypeScript frontend with a beautiful, responsive UI.
+A full-stack application for selling farm-fresh eggs, featuring a Go 1.25 GraphQL backend and a modern React TypeScript frontend with a beautiful, responsive UI.
 
 ## Features
 
