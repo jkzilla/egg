@@ -18,7 +18,11 @@ const defaultPort = "8080"
 // corsMiddleware adds CORS headers to allow frontend access
 func corsMiddleware(next http.Handler) http.Handler {
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins: []string{
+			"https://haileysgarden.com",
+			"https://www.haileysgarden.com",
+			"http://localhost:5173", // Local development
+		},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
