@@ -1,0 +1,36 @@
+# TruffleHog configuration for secret scanning
+# https://github.com/trufflesecurity/trufflehog
+
+# Detectors to enable (leave empty to enable all)
+detectors:
+
+# Paths to exclude from scanning
+exclude_paths:
+  - node_modules/
+  - frontend/node_modules/
+  - frontend/dist/
+  - vendor/
+  - .git/
+  - "*.lock"
+  - "*.sum"
+  - go.sum
+  - package-lock.json
+
+# File extensions to exclude
+exclude_extensions:
+  - .png
+  - .jpg
+  - .jpeg
+  - .gif
+  - .svg
+  - .ico
+  - .woff
+  - .woff2
+  - .ttf
+  - .eot
+
+# Verified secrets only (set to false to show unverified)
+only_verified: false
+
+# Maximum depth for scanning
+max_depth: 50
