@@ -1,0 +1,39 @@
+# Netlify Configuration for Egg Shop Frontend
+
+[build]
+  # Directory with the frontend code
+  base = "frontend/"
+
+  # Build command
+  command = "npm run build"
+
+  # Directory with the built files to deploy
+  publish = "dist/"
+
+[build.environment]
+  # Node version
+  NODE_VERSION = "20"
+
+  # GraphQL API endpoint - update this to your production backend URL
+  VITE_GRAPHQL_ENDPOINT = "https://your-backend-url.com/graphql"
+
+# Redirect all requests to index.html for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

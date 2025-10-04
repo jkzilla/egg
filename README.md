@@ -147,9 +147,21 @@ The application comes pre-loaded with sample eggs:
 
 ## Production Deployment
 
+### Deploy to Netlify (Frontend) + Render/Railway (Backend)
+
+For a complete guide on deploying the frontend to Netlify and backend to cloud platforms, see:
+
+**📘 [NETLIFY_DEPLOY.md](./NETLIFY_DEPLOY.md)** - Complete deployment guide with step-by-step instructions
+
+**Quick Start:**
+1. Deploy backend to [Render](https://render.com/) or [Railway](https://railway.app/)
+2. Deploy frontend to [Netlify](https://netlify.com/)
+3. Set `VITE_GRAPHQL_ENDPOINT` environment variable on Netlify
+4. Update CORS settings in backend
+
 ### Using Docker
 
-Build and run the application with Docker:
+Build and run the full-stack application with Docker:
 
 ```bash
 # Build the image
