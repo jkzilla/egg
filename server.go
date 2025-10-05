@@ -65,34 +65,20 @@ func startServer() {
 	// Create resolver with sample data
 	resolver := graph.NewResolver()
 
-	// Add sample eggs
+	// Add sample eggs - sold by half dozen or dozen
 	resolver.AddEgg(&model.Egg{
 		ID:                "1",
-		Type:              "Brown Chicken Egg",
-		Price:             0.50,
-		QuantityAvailable: 24,
-		Description:       strPtr("Fresh brown eggs from free-range chickens"),
+		Type:              "Half Dozen Eggs",
+		Price:             4.00,
+		QuantityAvailable: 4,
+		Description:       strPtr("6 fresh farm eggs, assorted colors from free-range chickens"),
 	})
 	resolver.AddEgg(&model.Egg{
 		ID:                "2",
-		Type:              "White Chicken Egg",
-		Price:             0.45,
-		QuantityAvailable: 36,
-		Description:       strPtr("Fresh white eggs from cage-free hens"),
-	})
-	resolver.AddEgg(&model.Egg{
-		ID:                "3",
-		Type:              "Duck Egg",
-		Price:             1.25,
-		QuantityAvailable: 12,
-		Description:       strPtr("Large duck eggs, perfect for baking"),
-	})
-	resolver.AddEgg(&model.Egg{
-		ID:                "4",
-		Type:              "Quail Egg",
-		Price:             0.75,
-		QuantityAvailable: 48,
-		Description:       strPtr("Delicate quail eggs, great for appetizers"),
+		Type:              "Dozen Eggs",
+		Price:             7.50,
+		QuantityAvailable: 2,
+		Description:       strPtr("12 fresh farm eggs, assorted colors from free-range chickens"),
 	})
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))

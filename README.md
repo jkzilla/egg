@@ -139,11 +139,9 @@ Visit `http://localhost:8080/playground` in your browser to access the GraphQL P
 
 ### Sample Data
 
-The application comes pre-loaded with sample eggs:
-- Brown Chicken Egg - $0.50 each (24 available)
-- White Chicken Egg - $0.45 each (36 available)
-- Duck Egg - $1.25 each (12 available)
-- Quail Egg - $0.75 each (48 available)
+The application comes pre-loaded with sample products:
+- Half Dozen Eggs - $4.00 (20 available)
+- Dozen Eggs - $7.50 (15 available)
 
 ## Production Deployment
 
