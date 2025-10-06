@@ -1,11 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
+import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from '@apollo/client'
 import App from './App.tsx'
 import './index.css'
 
 const client = new ApolloClient({
-  uri: import.meta.env.VITE_GRAPHQL_ENDPOINT || '/graphql',
+  link: new HttpLink({
+    uri: import.meta.env.VITE_GRAPHQL_ENDPOINT || '/graphql',
+  }),
   cache: new InMemoryCache(),
 })
 
