@@ -3,7 +3,7 @@ set -e
 
 # Configuration
 DOMAIN="haileysgarden.com"
-EC2_IP="34.228.195.182"  # Your EC2 instance IP
+EC2_IP="3.87.124.246"  # Your EC2 instance IP
 
 echo "🌐 Setting up Route 53 DNS for $DOMAIN..."
 

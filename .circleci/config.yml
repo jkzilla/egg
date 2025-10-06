@@ -153,7 +153,7 @@ jobs:
       - run:
           name: Test Docker Image
           command: |
-            docker run -d --name egg-test -p 8080:80 zealousidealowl/haileys-garden:${CIRCLE_SHA1}
+            docker run -d --name egg-test -p 8080:8080 zealousidealowl/haileys-garden:${CIRCLE_SHA1}
             sleep 5
             docker logs egg-test
             docker stop egg-test
@@ -194,11 +194,11 @@ jobs:
       - run:
           name: Wait for Server
           command: |
-            timeout 30 bash -c 'until curl -f http://localhost:80/playground; do sleep 1; done'
+            timeout 30 bash -c 'until curl -f http://localhost:8080/playground; do sleep 1; done'
       - run:
           name: Test GraphQL Endpoint
           command: |
-            curl -X POST http://localhost:80/graphql \
+            curl -X POST http://localhost:8080/graphql \
               -H "Content-Type: application/json" \
               -d '{"query":"{ eggs { id type price quantityAvailable } }"}' \
               | grep -q "Dozen Eggs" && echo "GraphQL test passed" || exit 1

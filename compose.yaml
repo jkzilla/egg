@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - 3000:80
+      - 3000:8080
     environment:
       - SIGNAL_API_URL=${SIGNAL_API_URL}
       - SIGNAL_NUMBER=${SIGNAL_NUMBER}

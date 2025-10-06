@@ -1,0 +1,9 @@
+Instance ID: i-02eff02b3e77c220b
+Public IP: 18.212.224.242
+ALB DNS: haileys-garden-alb-855092200.us-east-1.elb.amazonaws.com
+App URL: https://haileysgarden.com
+SSH Command: ssh -i ~/.ssh/haileys-garden-key.pem ubuntu@18.212.224.242
+Region: us-east-1
+Docker Image: zealousidealowl/haileys-garden:latest
+Target Group: arn:aws:elasticloadbalancing:us-east-1:011229313364:targetgroup/haileys-garden-tg/db59fff41eeb9268
+Load Balancer: arn:aws:elasticloadbalancing:us-east-1:011229313364:loadbalancer/app/haileys-garden-alb/feb464880e2a926a

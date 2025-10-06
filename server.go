@@ -13,7 +13,7 @@ import (
 	"github.com/rs/cors"
 )
 
-const defaultPort = "80"
+const defaultPort = "8080"
 
 // corsMiddleware adds CORS headers to allow frontend access
 func corsMiddleware(next http.Handler) http.Handler {

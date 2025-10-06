@@ -142,11 +142,11 @@ spec:
       - name: haileysgarden
         image: DOCKER_IMAGE_PLACEHOLDER
         ports:
-        - containerPort: 80
+        - containerPort: 8080
           hostPort: 8080
         env:
         - name: PORT
-          value: "80"
+          value: "8080"
         - name: SIGNAL_API_URL
           value: "http://signal-api:8080"
         - name: SIGNAL_NUMBER
@@ -165,7 +165,7 @@ spec:
     app: haileysgarden
   ports:
   - port: 8080
-    targetPort: 80
+    targetPort: 8080
 YAML
 
 echo "🌼 Hailey's Garden deployed and accessible via port 80"
