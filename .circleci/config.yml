@@ -201,9 +201,17 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{"query":"{ eggs { id type price quantityAvailable } }"}' \
               | grep -q "Dozen Eggs" && echo "GraphQL test passed" || exit 1
+      - run:
+          name: Create Test Artifacts
+          command: |
+            mkdir -p /tmp/artifacts
+            echo "Test artifact created at $(date)" > /tmp/artifacts/test-artifact.txt
+            # Copy any PNG files if they exist
+            find /tmp -name "*.png" -exec cp {} /tmp/artifacts/ \; 2>/dev/null || true
+          when: always
       - store_artifacts:
-          path: /tmp
-          destination: tmp-artifacts
+          path: /tmp/artifacts
+          destination: test-artifacts
           when: always
 
 workflows:
