@@ -1,0 +1,40 @@
+---
+# Ingress for Hailey's Garden
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: egg-shop-ingress
+  namespace: haileys-garden
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    # Rate limiting
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    # CORS if needed
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://haileysgarden.com,https://www.haileysgarden.com"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: haileysgarden.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: egg-shop
+            port:
+              number: 80
+  - host: www.haileysgarden.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: egg-shop
+            port:
+              number: 80

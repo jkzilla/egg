@@ -1,41 +1,45 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Deploying Hailey's Garden Egg Shop to K3s..."
+echo "🌼 Deploying Hailey's Garden with AWS Load Balancer + NGINX Ingress"
+echo "===================================================================="
 
-# Build the Docker image
-echo "📦 Building Docker image..."
-docker build -t egg:latest .
+# Apply manifests in order
+echo "📦 Creating namespace..."
+kubectl apply -f 00-namespace.yaml
 
-# Import image to K3s
-echo "📥 Importing image to K3s..."
-docker save egg:latest | sudo k3s ctr images import -
+echo "🔧 Creating ConfigMap and Secrets..."
+kubectl apply -f 01-configmap.yaml
+kubectl apply -f 02-secret.yaml
 
-# Apply Kubernetes manifests
-echo "☸️  Applying Kubernetes manifests..."
-kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/secret.yaml
-kubectl apply -f k8s/signal-api-deployment.yaml
-kubectl apply -f k8s/egg-deployment.yaml
-kubectl apply -f k8s/ingress.yaml
+echo "🚀 Deploying application..."
+kubectl apply -f 03-deployment.yaml
+kubectl apply -f 04-service.yaml
 
-# Wait for deployments
-echo "⏳ Waiting for deployments to be ready..."
-kubectl wait --for=condition=available --timeout=300s deployment/signal-api -n haileys-garden
-kubectl wait --for=condition=available --timeout=300s deployment/egg-shop -n haileys-garden
+echo "📱 Deploying Signal API..."
+kubectl apply -f 05-signal-api-deployment.yaml
 
-# Get service info
+echo "🔀 Installing NGINX Ingress Controller..."
+kubectl apply -f 06-nginx-ingress-controller.yaml
+
+echo "⏳ Waiting for NGINX Ingress Controller to be ready..."
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=120s
+
+echo "🌐 Creating Ingress..."
+kubectl apply -f 07-ingress.yaml
+
 echo ""
 echo "✅ Deployment complete!"
 echo ""
-echo "📊 Service Status:"
-kubectl get all -n haileys-garden
+echo "📊 Check status:"
+echo "  kubectl get all -n haileys-garden"
+echo "  kubectl get ingress -n haileys-garden"
+echo "  kubectl get svc -n ingress-nginx"
 echo ""
-echo "🌐 Access the application:"
-echo "   LoadBalancer: kubectl get svc egg-shop -n haileys-garden"
-echo "   Port Forward: kubectl port-forward -n haileys-garden svc/egg-shop 3000:80"
+echo "🔍 Get Load Balancer URL:"
+echo "  kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"
 echo ""
-echo "📱 Signal API QR Code (for linking):"
-echo "   kubectl port-forward -n haileys-garden svc/signal-api 8080:8080"
-echo "   Then visit: http://localhost:8080/v1/qrcodelink?device_name=haileys-garden"
+echo "📝 Point your Route 53 domain to the Load Balancer hostname"
