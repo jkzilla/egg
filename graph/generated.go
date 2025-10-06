@@ -56,7 +56,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		PurchaseEgg func(childComplexity int, id string, quantity int) int
+		PurchaseEgg func(childComplexity int, id string, quantity int, paymentMethod *string, pickupTime *string) int
 	}
 
 	PurchaseResult struct {
@@ -72,7 +72,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	PurchaseEgg(ctx context.Context, id string, quantity int) (*model.PurchaseResult, error)
+	PurchaseEgg(ctx context.Context, id string, quantity int, paymentMethod *string, pickupTime *string) (*model.PurchaseResult, error)
 }
 type QueryResolver interface {
 	Eggs(ctx context.Context) ([]*model.Egg, error)
@@ -139,7 +139,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.PurchaseEgg(childComplexity, args["id"].(string), args["quantity"].(int)), true
+		return e.complexity.Mutation.PurchaseEgg(childComplexity, args["id"].(string), args["quantity"].(int), args["paymentMethod"].(*string), args["pickupTime"].(*string)), true
 
 	case "PurchaseResult.message":
 		if e.complexity.PurchaseResult.Message == nil {
@@ -314,6 +314,16 @@ func (ec *executionContext) field_Mutation_purchaseEgg_args(ctx context.Context,
 		return nil, err
 	}
 	args["quantity"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "paymentMethod", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["paymentMethod"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "pickupTime", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["pickupTime"] = arg3
 	return args, nil
 }
 
@@ -544,7 +554,7 @@ func (ec *executionContext) _Mutation_purchaseEgg(ctx context.Context, field gra
 		ec.fieldContext_Mutation_purchaseEgg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().PurchaseEgg(ctx, fc.Args["id"].(string), fc.Args["quantity"].(int))
+			return ec.resolvers.Mutation().PurchaseEgg(ctx, fc.Args["id"].(string), fc.Args["quantity"].(int), fc.Args["paymentMethod"].(*string), fc.Args["pickupTime"].(*string))
 		},
 		nil,
 		ec.marshalNPurchaseResult2ᚖgithubᚗcomᚋjkzillaᚋeggᚋgraphᚋmodelᚐPurchaseResult,

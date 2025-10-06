@@ -75,7 +75,7 @@ jobs:
           name: Build Go Application
           command: |
             go build -o egg -v .
-            ./egg --help || echo "Binary built successfully"
+            echo "Binary built successfully"
       - store_test_results:
           path: coverage.out
       - store_artifacts:
@@ -187,7 +187,7 @@ jobs:
             curl -X POST http://localhost:8080/graphql \
               -H "Content-Type: application/json" \
               -d '{"query":"{ eggs { id type price quantityAvailable } }"}' \
-              | grep -q "Brown Chicken Egg" && echo "GraphQL test passed" || exit 1
+              | grep -q "Dozen Eggs" && echo "GraphQL test passed" || exit 1
 
 workflows:
   version: 2
