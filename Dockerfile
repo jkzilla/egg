@@ -46,10 +46,13 @@ COPY --from=frontend-builder /frontend/dist /frontend/dist
 # Security: use non-root user
 RUN adduser -D appuser && \
     chown -R appuser:appuser /frontend
-USER appuser
+
+# Note: Running as root to bind to port 80
+# In production, use a reverse proxy or Kubernetes to handle port mapping
+# USER appuser
 
 # Expose your app port
-EXPOSE 8080
+EXPOSE 80
 
 # Use JSON form for ENTRYPOINT (handles OS signals correctly)
 ENTRYPOINT ["/app"]

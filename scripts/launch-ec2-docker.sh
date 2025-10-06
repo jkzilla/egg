@@ -79,7 +79,7 @@ if aws ec2 describe-security-groups --group-names $ALB_SG_NAME --region $REGION 
 else
   ALB_SG_ID=$(aws ec2 create-security-group \
     --group-name $ALB_SG_NAME \
-    --description "Security group for Hailey's Garden ALB" \
+    --description "Security group for Haileys Garden ALB" \
     --vpc-id $VPC_ID \
     --region $REGION \
     --query 'GroupId' \
@@ -142,10 +142,11 @@ spec:
       - name: haileysgarden
         image: DOCKER_IMAGE_PLACEHOLDER
         ports:
-        - containerPort: 8080
+        - containerPort: 80
+          hostPort: 8080
         env:
         - name: PORT
-          value: "8080"
+          value: "80"
         - name: SIGNAL_API_URL
           value: "http://signal-api:8080"
         - name: SIGNAL_NUMBER
@@ -159,17 +160,13 @@ metadata:
   name: haileysgarden-service
   namespace: default
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: haileysgarden
   ports:
-  - port: 80
-    targetPort: 8080
-    nodePort: 30080
+  - port: 8080
+    targetPort: 80
 YAML
-
-# Enable forwarding from port 80 to app
-iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 30080
 
 echo "🌼 Hailey's Garden deployed and accessible via port 80"
 EOF

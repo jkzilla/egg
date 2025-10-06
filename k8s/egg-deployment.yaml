@@ -18,11 +18,12 @@ spec:
         image: egg:latest
         imagePullPolicy: Never  # For local K3s development
         ports:
-        - containerPort: 8080
+        - containerPort: 80
+          hostPort: 8080
           name: http
         env:
         - name: PORT
-          value: "8080"
+          value: "80"
         - name: SIGNAL_API_URL
           valueFrom:
             configMapKeyRef:
@@ -48,13 +49,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: 80
           initialDelaySeconds: 10
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: 80
           initialDelaySeconds: 5
           periodSeconds: 5
 ---
@@ -68,6 +69,9 @@ spec:
     app: egg-shop
   ports:
   - port: 80
-    targetPort: 8080
+    targetPort: 80
     name: http
+  - port: 8080
+    targetPort: 80
+    name: http-alt
   type: LoadBalancer
