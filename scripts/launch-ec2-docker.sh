@@ -1,18 +1,22 @@
 #!/bin/bash
 set -e
 
-echo "🌱 Launching Hailey's Garden — Docker-based K3s Deployment"
+echo "🌼 Launching Hailey's Garden — Full Auto Deploy with HTTPS (K3s + ACM)"
 
 # ───────────────────────────────
-# Configuration
+# CONFIGURATION
 INSTANCE_NAME="haileys-garden-k3s"
 INSTANCE_TYPE="t3.micro"
-AMI_ID="ami-0e86e20dae9224db8"  # Ubuntu 22.04 LTS in us-east-1
+AMI_ID="ami-0e86e20dae9224db8"  # Ubuntu 22.04 LTS
 KEY_NAME="haileys-garden-key"
 SG_NAME="haileys-garden-sg"
+ALB_SG_NAME="haileys-garden-alb-sg"
 REGION="us-east-1"
-DOCKER_IMAGE="zealousidealowl/haileys-garden:latest"  # Your Docker Hub image
+VPC_ID="vpc-d470ccb0"  # Your VPC ID
+ACM_CERT_ARN="arn:aws:acm:us-east-1:011229313364:certificate/1788d41a-e53e-473e-8579-4c3eed565dea"
+DOCKER_IMAGE="zealousidealowl/haileys-garden:latest"
 APP_PORT=8080
+DOMAIN="haileysgarden.com"
 # ───────────────────────────────
 
 echo "🐳 Building and pushing Docker image..."
@@ -59,11 +63,44 @@ else
 
   aws ec2 authorize-security-group-ingress --group-id $SG_ID --region $REGION --ip-permissions '[
     {"IpProtocol":"tcp","FromPort":22,"ToPort":22,"IpRanges":[{"CidrIp":"'${MY_IP}'/32"}]},
-    {"IpProtocol":"tcp","FromPort":80,"ToPort":80,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]},
-    {"IpProtocol":"tcp","FromPort":443,"ToPort":443,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]},
     {"IpProtocol":"tcp","FromPort":8080,"ToPort":8080,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}
+  ]' 2>/dev/null || echo "Security group rules already exist"
+fi
+
+# ─── Create ALB Security Group
+echo "🔒 Creating ALB security group..."
+if aws ec2 describe-security-groups --group-names $ALB_SG_NAME --region $REGION &>/dev/null; then
+  ALB_SG_ID=$(aws ec2 describe-security-groups \
+    --group-names $ALB_SG_NAME \
+    --region $REGION \
+    --query 'SecurityGroups[0].GroupId' \
+    --output text)
+  echo "✅ ALB security group exists: $ALB_SG_ID"
+else
+  ALB_SG_ID=$(aws ec2 create-security-group \
+    --group-name $ALB_SG_NAME \
+    --description "Security group for Hailey's Garden ALB" \
+    --vpc-id $VPC_ID \
+    --region $REGION \
+    --query 'GroupId' \
+    --output text)
+  echo "✅ Created ALB security group: $ALB_SG_ID"
+
+  # Allow HTTP and HTTPS from anywhere
+  aws ec2 authorize-security-group-ingress --group-id $ALB_SG_ID --region $REGION --ip-permissions '[
+    {"IpProtocol":"tcp","FromPort":80,"ToPort":80,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]},
+    {"IpProtocol":"tcp","FromPort":443,"ToPort":443,"IpRanges":[{"CidrIp":"0.0.0.0/0"}]}
   ]'
 fi
+
+# Update instance security group to allow traffic from ALB
+echo "🔐 Updating instance security group to allow ALB traffic..."
+aws ec2 authorize-security-group-ingress \
+  --group-id $SG_ID \
+  --protocol tcp \
+  --port 8080 \
+  --source-group $ALB_SG_ID \
+  --region $REGION 2>/dev/null || echo "ALB ingress rule already exists"
 
 # ─── Define EC2 User Data (Auto-provision script) ───────────────────────────────
 USER_DATA=$(cat <<'EOF'
@@ -175,12 +212,94 @@ PUBLIC_IP=$(aws ec2 describe-instances \
   --query 'Reservations[0].Instances[0].PublicIpAddress' \
   --output text)
 
+# ─── Get Subnets for ALB ───────────────────────────────
+echo "🌐 Getting VPC subnets..."
+SUBNETS=$(aws ec2 describe-subnets \
+  --filters "Name=vpc-id,Values=$VPC_ID" \
+  --region $REGION \
+  --query 'Subnets[*].SubnetId' \
+  --output text | tr '\t' ',')
+
+# ─── Create Target Group ───────────────────────────────
+echo "🎯 Creating target group..."
+TG_ARN=$(aws elbv2 create-target-group \
+  --name haileys-garden-tg \
+  --protocol HTTP \
+  --port 8080 \
+  --vpc-id $VPC_ID \
+  --health-check-path / \
+  --health-check-interval-seconds 30 \
+  --health-check-timeout-seconds 5 \
+  --healthy-threshold-count 2 \
+  --unhealthy-threshold-count 2 \
+  --region $REGION \
+  --query 'TargetGroups[0].TargetGroupArn' \
+  --output text 2>/dev/null || \
+  aws elbv2 describe-target-groups \
+    --names haileys-garden-tg \
+    --region $REGION \
+    --query 'TargetGroups[0].TargetGroupArn' \
+    --output text)
+
+echo "✅ Target group: $TG_ARN"
+
+# ─── Register Instance with Target Group ───────────────────────────────
+echo "📝 Registering instance with target group..."
+aws elbv2 register-targets \
+  --target-group-arn $TG_ARN \
+  --targets Id=$INSTANCE_ID \
+  --region $REGION
+
+# ─── Create Application Load Balancer ───────────────────────────────
+echo "⚖️  Creating Application Load Balancer..."
+ALB_ARN=$(aws elbv2 create-load-balancer \
+  --name haileys-garden-alb \
+  --subnets $(echo $SUBNETS | tr ',' ' ') \
+  --security-groups $ALB_SG_ID \
+  --region $REGION \
+  --query 'LoadBalancers[0].LoadBalancerArn' \
+  --output text 2>/dev/null || \
+  aws elbv2 describe-load-balancers \
+    --names haileys-garden-alb \
+    --region $REGION \
+    --query 'LoadBalancers[0].LoadBalancerArn' \
+    --output text)
+
+echo "✅ ALB created: $ALB_ARN"
+
+# Get ALB DNS name
+ALB_DNS=$(aws elbv2 describe-load-balancers \
+  --load-balancer-arns $ALB_ARN \
+  --region $REGION \
+  --query 'LoadBalancers[0].DNSName' \
+  --output text)
+
+# ─── Create HTTPS Listener ───────────────────────────────
+echo "🔐 Creating HTTPS listener..."
+aws elbv2 create-listener \
+  --load-balancer-arn $ALB_ARN \
+  --protocol HTTPS \
+  --port 443 \
+  --certificates CertificateArn=$ACM_CERT_ARN \
+  --default-actions Type=forward,TargetGroupArn=$TG_ARN \
+  --region $REGION 2>/dev/null || echo "HTTPS listener already exists"
+
+# ─── Create HTTP Listener (redirect to HTTPS) ───────────────────────────────
+echo "🔀 Creating HTTP to HTTPS redirect..."
+aws elbv2 create-listener \
+  --load-balancer-arn $ALB_ARN \
+  --protocol HTTP \
+  --port 80 \
+  --default-actions Type=redirect,RedirectConfig="{Protocol=HTTPS,Port=443,StatusCode=HTTP_301}" \
+  --region $REGION 2>/dev/null || echo "HTTP listener already exists"
+
 echo ""
-echo "✅ K3s + Docker Deployment Complete!"
+echo "✅ K3s + Docker + HTTPS Deployment Complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Instance ID:  $INSTANCE_ID"
 echo "Public IP:    $PUBLIC_IP"
-echo "App URL:      http://${PUBLIC_IP}"
+echo "ALB DNS:      $ALB_DNS"
+echo "App URL:      https://${DOMAIN}"
 echo "Docker Image: $DOCKER_IMAGE"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
@@ -188,12 +307,19 @@ echo "📝 Instance info saved to ec2-instance-info.txt"
 cat > ec2-instance-info.txt <<EOF
 Instance ID: $INSTANCE_ID
 Public IP: $PUBLIC_IP
-App URL: http://${PUBLIC_IP}
+ALB DNS: $ALB_DNS
+App URL: https://${DOMAIN}
 SSH Command: ssh -i ~/.ssh/${KEY_NAME}.pem ubuntu@${PUBLIC_IP}
 Region: $REGION
 Docker Image: $DOCKER_IMAGE
+Target Group: $TG_ARN
+Load Balancer: $ALB_ARN
 EOF
 
 echo ""
 echo "⏳ Deployment will take ~2-3 minutes"
 echo "📊 Monitor: ssh -i ~/.ssh/${KEY_NAME}.pem ubuntu@${PUBLIC_IP} 'sudo tail -f /var/log/cloud-init-output.log'"
+echo ""
+echo "🌐 Update DNS to point to ALB:"
+echo "   CNAME: $DOMAIN -> $ALB_DNS"
+echo "   CNAME: www.$DOMAIN -> $ALB_DNS"
