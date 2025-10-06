@@ -143,7 +143,6 @@ spec:
         image: DOCKER_IMAGE_PLACEHOLDER
         ports:
         - containerPort: 8080
-          hostPort: 8080
         env:
         - name: PORT
           value: "8080"
@@ -160,15 +159,38 @@ metadata:
   name: haileysgarden-service
   namespace: default
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: haileysgarden
   ports:
   - port: 8080
     targetPort: 8080
+    nodePort: 30080
 YAML
 
-echo "🌼 Hailey's Garden deployed and accessible via port 80"
+# Create systemd service for port forwarding
+cat > /etc/systemd/system/port-forward-8080.service <<'SYSTEMD'
+[Unit]
+Description=Forward port 8080 to NodePort 30080
+After=network.target k3s.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/socat TCP-LISTEN:8080,fork,reuseaddr TCP:localhost:30080
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+SYSTEMD
+
+# Install socat and enable port forwarding
+apt-get install -y socat
+systemctl daemon-reload
+systemctl enable port-forward-8080
+systemctl start port-forward-8080
+
+echo "🌼 Hailey's Garden deployed and accessible via port 8080"
 EOF
 )
 
