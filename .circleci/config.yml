@@ -138,13 +138,12 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
+      - docker/check:
+          docker-username: DOCKER_USERNAME
+          docker-password: DOCKER_PASSWORD
       - run:
           name: Plan a deploy
           command: circleci run release plan --target-version=${CIRCLE_SHA1}
-      - run:
-          name: Login to Docker Hub
-          command: |
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - run:
           name: Build Docker Image
           command: |
@@ -236,7 +235,7 @@ workflows:
                 - master
                 - develop
           context:
-            - docker-hub-creds  # Create this context in CircleCI with DOCKER_USERNAME and DOCKER_PASSWORD
+            - docker-hub-creds  # Provides DOCKER_USERNAME and DOCKER_PASSWORD
 
   # Nightly security scan
   nightly-security:
