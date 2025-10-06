@@ -25,8 +25,8 @@ export const GET_EGG = gql`
 `
 
 export const PURCHASE_EGG = gql`
-  mutation PurchaseEgg($id: ID!, $quantity: Int!, $paymentMethod: String, $pickupTime: String) {
-    purchaseEgg(id: $id, quantity: $quantity, paymentMethod: $paymentMethod, pickupTime: $pickupTime) {
+  mutation PurchaseEgg($id: ID!, $quantity: Int!, $paymentMethod: String, $pickupTime: String, $customerPhone: String) {
+    purchaseEgg(id: $id, quantity: $quantity, paymentMethod: $paymentMethod, pickupTime: $pickupTime, customerPhone: $customerPhone) {
       success
       message
       remainingQuantity

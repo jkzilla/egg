@@ -18,5 +18,5 @@ type Query {
 }
 
 type Mutation {
-  purchaseEgg(id: ID!, quantity: Int!, paymentMethod: String, pickupTime: String): PurchaseResult!
+  purchaseEgg(id: ID!, quantity: Int!, paymentMethod: String, pickupTime: String, customerPhone: String): PurchaseResult!
 }

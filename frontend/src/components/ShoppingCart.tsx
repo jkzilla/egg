@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { PURCHASE_EGG } from '../graphql/queries'
 import { CartItem } from '../types'
-import { X, Trash2, ShoppingBag, Clock, Banknote } from 'lucide-react'
+import { X, Trash2, ShoppingBag, Clock, Banknote, Phone } from 'lucide-react'
 
 interface ShoppingCartProps {
   cart: CartItem[]
@@ -28,6 +28,7 @@ export default function ShoppingCart({
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'online'>('online')
   const [pickupTime, setPickupTime] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
 
   const totalPrice = cart.reduce(
     (sum, item) => sum + item.egg.price * item.quantity,
@@ -35,11 +36,19 @@ export default function ShoppingCart({
   )
 
   const handleCheckout = async () => {
-    // Validate cash payment requires pickup time
+    // Validate cash payment requires pickup time and phone number
     if (paymentMethod === 'cash' && !pickupTime) {
       setMessage({
         type: 'error',
         text: 'Please select a pickup time for cash payment.',
+      })
+      return
+    }
+
+    if (paymentMethod === 'cash' && !customerPhone) {
+      setMessage({
+        type: 'error',
+        text: 'Please enter your phone number for order confirmation.',
       })
       return
     }
@@ -56,6 +65,7 @@ export default function ShoppingCart({
               quantity: item.quantity,
               paymentMethod: paymentMethod,
               pickupTime: paymentMethod === 'cash' ? pickupTime : null,
+              customerPhone: paymentMethod === 'cash' ? customerPhone : null,
             },
           })
         )
@@ -79,6 +89,7 @@ export default function ShoppingCart({
         setTimeout(() => {
           setMessage(null)
           setPickupTime('')
+          setCustomerPhone('')
           onClose()
         }, 3000)
       } else {
@@ -238,21 +249,39 @@ export default function ShoppingCart({
               </div>
             </div>
 
-            {/* Pickup Time (only for cash) */}
+            {/* Customer Phone and Pickup Time (only for cash) */}
             {paymentMethod === 'cash' && (
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  <Clock className="w-4 h-4 inline mr-1" />
-                  Pickup Time
-                </label>
-                <input
-                  type="datetime-local"
-                  value={pickupTime}
-                  onChange={(e) => setPickupTime(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  min={new Date().toISOString().slice(0, 16)}
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    <Phone className="w-4 h-4 inline mr-1" />
+                    Your Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="+1234567890"
+                    className="w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                  <p className="text-xs text-gray-500">
+                    We'll send you an order confirmation via Signal
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    <Clock className="w-4 h-4 inline mr-1" />
+                    Pickup Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={pickupTime}
+                    onChange={(e) => setPickupTime(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                </div>
+              </>
             )}
 
             <button

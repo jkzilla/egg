@@ -15,7 +15,7 @@ import (
 )
 
 // PurchaseEgg is the resolver for the purchaseEgg field.
-func (r *mutationResolver) PurchaseEgg(ctx context.Context, id string, quantity int, paymentMethod *string, pickupTime *string) (*model.PurchaseResult, error) {
+func (r *mutationResolver) PurchaseEgg(ctx context.Context, id string, quantity int, paymentMethod *string, pickupTime *string, customerPhone *string) (*model.PurchaseResult, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -46,25 +46,50 @@ func (r *mutationResolver) PurchaseEgg(ctx context.Context, id string, quantity 
 
 	egg.QuantityAvailable -= quantity
 
-	// Send Signal notification if cash payment
+	// Send Signal notifications if cash payment
 	if paymentMethod != nil && *paymentMethod == "cash" && pickupTime != nil {
+		totalPrice := float64(quantity) * egg.Price
+
+		// Send notification to owner
 		ownerPhone := os.Getenv("OWNER_PHONE_NUMBER")
 		if ownerPhone != "" {
-			totalPrice := float64(quantity) * egg.Price
-			message := fmt.Sprintf(
-				"New Cash Order!\n\nItem: %s\nQuantity: %d\nTotal: $%.2f\nPickup Time: %s\n\nPlease confirm with customer.",
+			ownerMessage := fmt.Sprintf(
+				"New Cash Order!\n\nItem: %s\nQuantity: %d\nTotal: $%.2f\nPickup Time: %s\nCustomer Phone: %s\n\nPlease confirm with customer.",
+				egg.Type,
+				quantity,
+				totalPrice,
+				*pickupTime,
+				func() string {
+					if customerPhone != nil {
+						return *customerPhone
+					}
+					return "Not provided"
+				}(),
+			)
+
+			err := signal.SendMessage(ownerPhone, ownerMessage)
+			if err != nil {
+				log.Printf("Failed to send Signal notification to owner: %v", err)
+			} else {
+				log.Printf("Signal notification sent successfully to owner %s", ownerPhone)
+			}
+		}
+
+		// Send confirmation to customer
+		if customerPhone != nil && *customerPhone != "" {
+			customerMessage := fmt.Sprintf(
+				"Order Confirmed!\n\nThank you for your order from Hailey's Garden.\n\nItem: %s\nQuantity: %d\nTotal: $%.2f\nPickup Time: %s\n\nPlease bring cash payment at pickup. See you soon!",
 				egg.Type,
 				quantity,
 				totalPrice,
 				*pickupTime,
 			)
 
-			err := signal.SendMessage(ownerPhone, message)
+			err := signal.SendMessage(*customerPhone, customerMessage)
 			if err != nil {
-				log.Printf("Failed to send Signal notification: %v", err)
-				// Don't fail the purchase if notification fails
+				log.Printf("Failed to send Signal confirmation to customer: %v", err)
 			} else {
-				log.Printf("Signal notification sent successfully to %s", ownerPhone)
+				log.Printf("Signal confirmation sent successfully to customer %s", *customerPhone)
 			}
 		}
 	}

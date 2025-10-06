@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signal-api
+  namespace: haileys-garden
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: signal-api
+  template:
+    metadata:
+      labels:
+        app: signal-api
+    spec:
+      containers:
+      - name: signal-api
+        image: bbernhard/signal-cli-rest-api:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: signal-data
+          mountPath: /home/.local/share/signal-cli
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: signal-data
+        persistentVolumeClaim:
+          claimName: signal-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: signal-api
+  namespace: haileys-garden
+spec:
+  selector:
+    app: signal-api
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: signal-data-pvc
+  namespace: haileys-garden
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

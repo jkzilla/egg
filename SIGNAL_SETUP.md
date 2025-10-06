@@ -6,6 +6,8 @@ This application uses Signal to send order notifications for cash payments.
 
 You need to run a Signal CLI REST API server to send messages. The easiest way is using Docker.
 
+**Note:** You can use a Google Voice number with Signal! Just register your Google Voice number with Signal first.
+
 ## Setup Instructions
 
 ### 1. Run Signal CLI REST API
@@ -34,8 +36,8 @@ Update your `.env` file:
 
 ```bash
 SIGNAL_API_URL=http://localhost:8080
-SIGNAL_NUMBER=+1234567890  # Your registered Signal number
-OWNER_PHONE_NUMBER=+1234567890  # Phone number to receive notifications
+SIGNAL_NUMBER=+17073243359  # Your registered Signal number (Google Voice)
+OWNER_PHONE_NUMBER=+17073243359  # Phone number to receive notifications (Google Voice)
 ```
 
 ### 4. Test the Setup
@@ -47,8 +49,8 @@ curl -X POST "http://localhost:8080/v2/send" \
   -H "Content-Type: application/json" \
   -d '{
     "message": "Test message",
-    "number": "+1234567890",
-    "recipients": ["+1234567890"]
+    "number": "+17073243359",
+    "recipients": ["+17073243359"]
   }'
 ```
 
