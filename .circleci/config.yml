@@ -201,6 +201,10 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{"query":"{ eggs { id type price quantityAvailable } }"}' \
               | grep -q "Dozen Eggs" && echo "GraphQL test passed" || exit 1
+      - store_artifacts:
+          path: /tmp
+          destination: tmp-artifacts
+          when: always
 
 workflows:
   version: 2
