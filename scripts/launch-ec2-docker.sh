@@ -121,62 +121,37 @@ mkdir -p /root/.kube
 cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
 chmod 600 /root/.kube/config
 
-# Create K3s Deployment using pre-built Docker image
-cat <<YAML | /usr/local/bin/kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: haileysgarden-app
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: haileysgarden
-  template:
-    metadata:
-      labels:
-        app: haileysgarden
-    spec:
-      containers:
-      - name: haileysgarden
-        image: DOCKER_IMAGE_PLACEHOLDER
-        ports:
-        - containerPort: 8080
-        env:
-        - name: PORT
-          value: "8080"
-        - name: SIGNAL_API_URL
-          value: "http://signal-api:8080"
-        - name: SIGNAL_NUMBER
-          value: "+17073243359"
-        - name: OWNER_PHONE_NUMBER
-          value: "+17073243359"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: haileysgarden-service
-  namespace: default
-spec:
-  type: NodePort
-  selector:
-    app: haileysgarden
-  ports:
-  - port: 8080
-    targetPort: 8080
-    nodePort: 30080
-YAML
+# Clone the repository to get the latest K8s manifests
+cd /tmp
+git clone https://github.com/jkzilla/egg.git
+cd egg/k8s
 
-# Create systemd service for port forwarding
-cat > /etc/systemd/system/port-forward-8080.service <<'SYSTEMD'
+# Apply all K8s manifests in order
+/usr/local/bin/kubectl apply -f 00-namespace.yaml
+/usr/local/bin/kubectl apply -f 01-configmap.yaml
+/usr/local/bin/kubectl apply -f 02-secret.yaml
+/usr/local/bin/kubectl apply -f 03-deployment.yaml
+/usr/local/bin/kubectl apply -f 04-service.yaml
+/usr/local/bin/kubectl apply -f 05-signal-api-deployment.yaml
+/usr/local/bin/kubectl apply -f 06-nginx-ingress-controller.yaml
+/usr/local/bin/kubectl apply -f 07-ingress.yaml
+
+# Wait for deployments to be ready
+/usr/local/bin/kubectl wait --for=condition=available --timeout=300s deployment/egg-shop -n haileys-garden
+/usr/local/bin/kubectl wait --for=condition=available --timeout=300s deployment/signal-api -n haileys-garden
+
+# Get the NGINX Ingress NodePort for HTTP
+NGINX_HTTP_PORT=\$(/usr/local/bin/kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.spec.ports[?(@.name=="http")].nodePort}')
+
+# Create systemd service for port forwarding to NGINX Ingress
+cat > /etc/systemd/system/port-forward-8080.service <<SYSTEMD
 [Unit]
-Description=Forward port 8080 to NodePort 30080
+Description=Forward port 8080 to NGINX Ingress
 After=network.target k3s.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/socat TCP-LISTEN:8080,fork,reuseaddr TCP:localhost:30080
+ExecStart=/usr/bin/socat TCP-LISTEN:8080,fork,reuseaddr TCP:localhost:\${NGINX_HTTP_PORT}
 Restart=always
 RestartSec=5
 
@@ -190,7 +165,7 @@ systemctl daemon-reload
 systemctl enable port-forward-8080
 systemctl start port-forward-8080
 
-echo "🌼 Hailey's Garden deployed and accessible via port 8080"
+echo "🌼 Hailey's Garden deployed with NGINX Ingress and Signal API"
 EOF
 )
 
