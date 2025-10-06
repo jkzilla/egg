@@ -138,18 +138,19 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
-      - docker/check:
-          docker-username: DOCKER_USERNAME
-          docker-password: DOCKER_PASSWORD
+      - run:
+          name: Login to Docker Hub
+          command: |
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - run:
           name: Build Docker Image
           command: |
-            docker build -t ${DOCKER_USERNAME}/egg-shop:${CIRCLE_SHA1} .
-            docker tag ${DOCKER_USERNAME}/egg-shop:${CIRCLE_SHA1} ${DOCKER_USERNAME}/egg-shop:latest
+            docker build -t zealousidealowl/haileys-garden:${CIRCLE_SHA1} .
+            docker tag zealousidealowl/haileys-garden:${CIRCLE_SHA1} zealousidealowl/haileys-garden:latest
       - run:
           name: Test Docker Image
           command: |
-            docker run -d --name egg-test -p 8080:8080 ${DOCKER_USERNAME}/egg-shop:${CIRCLE_SHA1}
+            docker run -d --name egg-test -p 8080:8080 zealousidealowl/haileys-garden:${CIRCLE_SHA1}
             sleep 5
             docker logs egg-test
             docker stop egg-test
@@ -160,9 +161,11 @@ jobs:
               - equal: [ main, << pipeline.git.branch >> ]
               - equal: [ master, << pipeline.git.branch >> ]
           steps:
-            - docker/push:
-                image: ${DOCKER_USERNAME}/egg-shop
-                tag: ${CIRCLE_SHA1},latest
+            - run:
+                name: Push Docker Image
+                command: |
+                  docker push zealousidealowl/haileys-garden:${CIRCLE_SHA1}
+                  docker push zealousidealowl/haileys-garden:latest
 
   # Integration tests
   integration-test:
