@@ -4,10 +4,13 @@ import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from '@apollo/c
 import App from './App.tsx'
 import './index.css'
 
+// Create HttpLink for Apollo Client 4.0 compatibility
+const httpLink = new HttpLink({
+  uri: import.meta.env.VITE_GRAPHQL_ENDPOINT || '/graphql',
+})
+
 const client = new ApolloClient({
-  link: new HttpLink({
-    uri: import.meta.env.VITE_GRAPHQL_ENDPOINT || '/graphql',
-  }),
+  link: httpLink,
   cache: new InMemoryCache(),
 })
 
