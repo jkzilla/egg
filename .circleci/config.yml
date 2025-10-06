@@ -206,9 +206,21 @@ jobs:
           command: |
             mkdir -p /tmp/artifacts
             echo "Test artifact created at $(date)" > /tmp/artifacts/test-artifact.txt
-            # Copy any PNG files if they exist
-            find /tmp -name "*.png" -exec cp {} /tmp/artifacts/ \; 2>/dev/null || true
+            # Copy signal-qr.png from project directory if it exists
+            if [ -f /home/circleci/project/signal-qr.png ]; then
+              cp /home/circleci/project/signal-qr.png /tmp/artifacts/
+              echo "Copied signal-qr.png to artifacts"
+            fi
+            # Generate a simple test image using ImageMagick or create placeholder
+            if command -v convert &> /dev/null; then
+              convert -size 100x100 xc:red /tmp/artifacts/test-image.png
+            else
+              echo "PNG placeholder - ImageMagick not available" > /tmp/artifacts/test-image.txt
+            fi
+            # Copy any existing PNG files from /tmp
+            find /tmp -maxdepth 1 -name "*.png" -exec cp {} /tmp/artifacts/ \; 2>/dev/null || true
           when: always
+
       - store_artifacts:
           path: /tmp/artifacts
           destination: test-artifacts
