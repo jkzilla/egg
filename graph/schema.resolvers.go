@@ -11,7 +11,7 @@ import (
 	"os"
 
 	"github.com/jkzilla/egg/graph/model"
-	"github.com/jkzilla/egg/twilio"
+	"github.com/jkzilla/egg/signal"
 )
 
 // PurchaseEgg is the resolver for the purchaseEgg field.
@@ -46,12 +46,12 @@ func (r *mutationResolver) PurchaseEgg(ctx context.Context, id string, quantity 
 
 	egg.QuantityAvailable -= quantity
 
-	// Send SMS notification if cash payment
+	// Send Signal notification if cash payment
 	if paymentMethod != nil && *paymentMethod == "cash" && pickupTime != nil {
 		ownerPhone := os.Getenv("OWNER_PHONE_NUMBER")
 		if ownerPhone != "" {
 			totalPrice := float64(quantity) * egg.Price
-			smsMessage := fmt.Sprintf(
+			message := fmt.Sprintf(
 				"New Cash Order!\n\nItem: %s\nQuantity: %d\nTotal: $%.2f\nPickup Time: %s\n\nPlease confirm with customer.",
 				egg.Type,
 				quantity,
@@ -59,12 +59,12 @@ func (r *mutationResolver) PurchaseEgg(ctx context.Context, id string, quantity 
 				*pickupTime,
 			)
 
-			err := twilio.SendSMS(ownerPhone, smsMessage)
+			err := signal.SendMessage(ownerPhone, message)
 			if err != nil {
-				log.Printf("Failed to send SMS notification: %v", err)
-				// Don't fail the purchase if SMS fails
+				log.Printf("Failed to send Signal notification: %v", err)
+				// Don't fail the purchase if notification fails
 			} else {
-				log.Printf("SMS notification sent successfully to %s", ownerPhone)
+				log.Printf("Signal notification sent successfully to %s", ownerPhone)
 			}
 		}
 	}
