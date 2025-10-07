@@ -4,7 +4,7 @@ set -e
 # Configuration
 REGION="us-east-1"
 AMI_ID="ami-0e2c8caa4b6378d8c"
-INSTANCE_TYPE="t3.micro"
+INSTANCE_TYPE="t3.small"
 KEY_NAME="haileys-garden-key"
 SECURITY_GROUP="haileys-garden-sg"
 SUBNET_ID="subnet-0b22bf6e"

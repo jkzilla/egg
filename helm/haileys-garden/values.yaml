@@ -18,12 +18,11 @@ ingress:
   enabled: true
   className: nginx
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
     nginx.ingress.kubernetes.io/limit-rps: "100"
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://haileysgarden.com,https://www.haileysgarden.com"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://haileysgarden.com,https://www.haileysgarden.com,http://haileysgarden.com,http://www.haileysgarden.com"
   hosts:
     - host: haileysgarden.com
       paths:
