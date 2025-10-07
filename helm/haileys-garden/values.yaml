@@ -1,0 +1,99 @@
+# Default values for haileys-garden
+replicaCount: 2
+
+image:
+  repository: zealousidealowl/haileys-garden
+  pullPolicy: Always
+  tag: "latest"
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://haileysgarden.com,https://www.haileysgarden.com"
+  hosts:
+    - host: haileysgarden.com
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: www.haileysgarden.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+# Signal API configuration
+signalApi:
+  enabled: true
+  image:
+    repository: bbernhard/signal-cli-rest-api
+    tag: latest
+    pullPolicy: Always
+  service:
+    port: 8080
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# Application configuration
+config:
+  signalApiUrl: "http://signal-api:8080"
+  signalNumber: "+17073243359"
+  ownerPhoneNumber: "+17073243359"
+  port: "8080"
+
+# NGINX Ingress Controller
+nginxIngress:
+  enabled: true
+  controller:
+    service:
+      type: LoadBalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "external"
+        service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "instance"
+        service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+        service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-1:011229313364:certificate/1788d41a-e53e-473e-8579-4c3eed565dea"
+        service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+        service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+        service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: "/healthz"
+        service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "10254"
+        service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: "http"

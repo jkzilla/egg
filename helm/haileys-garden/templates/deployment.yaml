@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "haileys-garden.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "haileys-garden.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "haileys-garden.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "haileys-garden.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.targetPort }}
+          protocol: TCP
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "haileys-garden.fullname" . }}-config
+              key: PORT
+        - name: SIGNAL_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "haileys-garden.fullname" . }}-config
+              key: SIGNAL_API_URL
+        - name: SIGNAL_NUMBER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "haileys-garden.fullname" . }}-secrets
+              key: SIGNAL_NUMBER
+        - name: OWNER_PHONE_NUMBER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "haileys-garden.fullname" . }}-secrets
+              key: OWNER_PHONE_NUMBER
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}

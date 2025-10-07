@@ -1,0 +1,48 @@
+{{- if .Values.signalApi.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signal-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: signal-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: signal-api
+  template:
+    metadata:
+      labels:
+        app: signal-api
+    spec:
+      containers:
+      - name: signal-api
+        image: "{{ .Values.signalApi.image.repository }}:{{ .Values.signalApi.image.tag }}"
+        imagePullPolicy: {{ .Values.signalApi.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.signalApi.service.port }}
+        volumeMounts:
+        - name: signal-data
+          mountPath: /home/.local/share/signal-cli
+        resources:
+          {{- toYaml .Values.signalApi.resources | nindent 10 }}
+      volumes:
+      - name: signal-data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: signal-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: signal-api
+spec:
+  selector:
+    app: signal-api
+  ports:
+  - port: {{ .Values.signalApi.service.port }}
+    targetPort: {{ .Values.signalApi.service.port }}
+  type: ClusterIP
+{{- end }}

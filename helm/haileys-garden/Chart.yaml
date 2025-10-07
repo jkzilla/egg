@@ -1,0 +1,13 @@
+apiVersion: v2
+name: haileys-garden
+description: A Helm chart for Hailey's Garden egg shop with Signal notifications
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - ecommerce
+  - eggs
+  - signal
+maintainers:
+  - name: jkzilla
+    email: your-email@example.com

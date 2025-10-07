@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "haileys-garden.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "haileys-garden.labels" . | nindent 4 }}
+data:
+  SIGNAL_API_URL: {{ .Values.config.signalApiUrl | quote }}
+  PORT: {{ .Values.config.port | quote }}
