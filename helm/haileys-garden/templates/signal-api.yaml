@@ -25,11 +25,20 @@ spec:
         volumeMounts:
         - name: signal-data
           mountPath: /home/.local/share/signal-cli
+        - name: qr-codes
+          mountPath: /tmp/qr-codes
+        env:
+        - name: QR_CODE_PATH
+          value: "/tmp/qr-codes"
         resources:
           {{- toYaml .Values.signalApi.resources | nindent 10 }}
       volumes:
       - name: signal-data
         emptyDir: {}
+      - name: qr-codes
+        hostPath:
+          path: /tmp/signal-qr-codes
+          type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
