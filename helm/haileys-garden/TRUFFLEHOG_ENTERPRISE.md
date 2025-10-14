@@ -1,6 +1,6 @@
 # TruffleHog Enterprise On-Premise Deployment
 
-This Helm chart includes TruffleHog Enterprise for continuous secret scanning of your codebase.
+This Helm chart includes TruffleHog Enterprise for continuous secret scanning of your codebase with S3 integration.
 
 ## Architecture
 
@@ -11,25 +11,38 @@ This Helm chart includes TruffleHog Enterprise for continuous secret scanning of
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ │
 │  │   Hailey's   │    │  TruffleHog  │    │  PostgreSQL  │ │
 │  │    Garden    │    │  Enterprise  │◄───┤   Database   │ │
-│  │     App      │    │              │    │              │ │
-│  └──────────────┘    └──────────────┘    └──────────────┘ │
-│         │                    │                             │
-│         │                    │                             │
-│  ┌──────▼────────────────────▼─────────────────────────┐  │
-│  │            NGINX Ingress Controller                  │  │
-│  └──────────────────────────────────────────────────────┘  │
-│         │                    │                             │
-└─────────┼────────────────────┼─────────────────────────────┘
+│  │     App      │    │   + S3 Scan  │    │              │ │
+│  └──────────────┘    └──────┬───────┘    └──────┬───────┘ │
+│         │                    │                    │         │
+│         │                    │                    │         │
+│  ┌──────▼────────────────────▼────────────────────▼─────┐  │
+│  │            NGINX Ingress Controller                   │  │
+│  └───────────────────────────────────────────────────────┘  │
+│         │                    │                              │
+└─────────┼────────────────────┼──────────────────────────────┘
           │                    │
           ▼                    ▼
   haileysgarden.com    trufflehog.haileysgarden.com
+          │                    │
+          │                    ▼
+          │            ┌───────────────┐
+          │            │  AWS S3       │
+          │            ├───────────────┤
+          │            │ • Scan Logs   │
+          │            │ • Scan Backups│
+          └───────────▶│ • Results     │
+                       │ • DB Backups  │
+                       └───────────────┘
 ```
 
 ## Features
 
 - **Continuous Scanning**: Automatically scans GitHub repositories every hour
+- **S3 Bucket Scanning**: Scans S3 buckets for exposed secrets
 - **Secret Detection**: Detects AWS keys, GitHub tokens, Slack webhooks, and more
 - **Slack Notifications**: Alerts team when secrets are found
+- **S3 Results Storage**: Store scan results in S3 for long-term retention
+- **Automated Backups**: Daily PostgreSQL backups to S3
 - **Web Dashboard**: Access at `trufflehog.haileysgarden.com`
 - **PostgreSQL Backend**: Persistent storage for scan results
 - **Kubernetes Native**: Fully integrated with your existing infrastructure

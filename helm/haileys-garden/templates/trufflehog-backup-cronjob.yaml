@@ -1,0 +1,75 @@
+{{- if and .Values.trufflehog.enabled .Values.trufflehog.config.s3.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "haileys-garden.fullname" . }}-trufflehog-backup
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "haileys-garden.labels" . | nindent 4 }}
+    app.kubernetes.io/component: trufflehog-backup
+spec:
+  schedule: {{ .Values.trufflehog.config.s3.backup.schedule | quote }}
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "haileys-garden.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: trufflehog-backup
+        spec:
+          {{- if .Values.trufflehog.config.s3.serviceAccount.create }}
+          serviceAccountName: {{ include "haileys-garden.fullname" . }}-trufflehog-sa
+          {{- end }}
+          restartPolicy: OnFailure
+          containers:
+          - name: backup
+            image: postgres:15-alpine
+            command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Starting PostgreSQL backup..."
+              BACKUP_FILE="/tmp/trufflehog-backup-$(date +%Y%m%d-%H%M%S).sql"
+              
+              # Create backup
+              PGPASSWORD=$DATABASE_PASSWORD pg_dump \
+                -h $DATABASE_HOST \
+                -U $DATABASE_USER \
+                -d $DATABASE_NAME \
+                > $BACKUP_FILE
+              
+              # Install AWS CLI
+              apk add --no-cache aws-cli
+              
+              # Upload to S3
+              aws s3 cp $BACKUP_FILE \
+                s3://$S3_BACKUP_BUCKET/$(basename $BACKUP_FILE) \
+                --region $AWS_REGION
+              
+              echo "Backup completed successfully"
+              
+              # Cleanup old backups (keep last 30 days)
+              aws s3 ls s3://$S3_BACKUP_BUCKET/ | \
+                awk '{print $4}' | \
+                head -n -30 | \
+                xargs -I {} aws s3 rm s3://$S3_BACKUP_BUCKET/{}
+            env:
+            - name: DATABASE_HOST
+              value: {{ .Values.trufflehog.database.host | quote }}
+            - name: DATABASE_USER
+              value: {{ .Values.trufflehog.database.user | quote }}
+            - name: DATABASE_NAME
+              value: {{ .Values.trufflehog.database.name | quote }}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "haileys-garden.fullname" . }}-trufflehog-secret
+                  key: database-password
+            - name: AWS_REGION
+              value: {{ .Values.trufflehog.config.s3.region | quote }}
+            - name: S3_BACKUP_BUCKET
+              value: {{ .Values.trufflehog.config.s3.backup.bucket | quote }}
+{{- end }}

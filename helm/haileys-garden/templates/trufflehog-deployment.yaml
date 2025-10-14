@@ -19,6 +19,9 @@ spec:
         {{- include "haileys-garden.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: trufflehog
     spec:
+      {{- if .Values.trufflehog.config.s3.serviceAccount.create }}
+      serviceAccountName: {{ include "haileys-garden.fullname" . }}-trufflehog-sa
+      {{- end }}
       containers:
       - name: trufflehog
         image: "{{ .Values.trufflehog.image.repository }}:{{ .Values.trufflehog.image.tag }}"
@@ -60,6 +63,26 @@ spec:
             secretKeyRef:
               name: {{ include "haileys-garden.fullname" . }}-trufflehog-secret
               key: slack-webhook
+        {{- end }}
+        {{- if .Values.trufflehog.config.s3.enabled }}
+        - name: S3_ENABLED
+          value: "true"
+        - name: AWS_REGION
+          value: {{ .Values.trufflehog.config.s3.region | quote }}
+        - name: S3_SCAN_BUCKETS
+          value: {{ range .Values.trufflehog.config.s3.scanBuckets }}{{ .name }},{{ end }}
+        {{- if .Values.trufflehog.config.s3.resultsStorage.enabled }}
+        - name: S3_RESULTS_BUCKET
+          value: {{ .Values.trufflehog.config.s3.resultsStorage.bucket | quote }}
+        - name: S3_RESULTS_PREFIX
+          value: {{ .Values.trufflehog.config.s3.resultsStorage.prefix | quote }}
+        {{- end }}
+        {{- if .Values.trufflehog.config.s3.backup.enabled }}
+        - name: S3_BACKUP_BUCKET
+          value: {{ .Values.trufflehog.config.s3.backup.bucket | quote }}
+        - name: S3_BACKUP_SCHEDULE
+          value: {{ .Values.trufflehog.config.s3.backup.schedule | quote }}
+        {{- end }}
         {{- end }}
         livenessProbe:
           httpGet:

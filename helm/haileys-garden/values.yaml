@@ -112,6 +112,31 @@ trufflehog:
       enabled: true
       # Webhook should be set via secret
       webhookSecret: slack-webhook
+    # S3 integration
+    s3:
+      enabled: true
+      region: us-east-1
+      # Buckets to scan for secrets
+      scanBuckets:
+        - name: haileys-garden-logs
+          prefix: ""
+        - name: haileys-garden-backups
+          prefix: ""
+      # Store scan results in S3
+      resultsStorage:
+        enabled: true
+        bucket: trufflehog-scan-results
+        prefix: scans/
+      # Backup PostgreSQL to S3
+      backup:
+        enabled: true
+        bucket: trufflehog-db-backups
+        schedule: "0 2 * * *"  # Daily at 2 AM
+      # IAM role for S3 access (use IRSA on EKS)
+      serviceAccount:
+        create: true
+        annotations:
+          eks.amazonaws.com/role-arn: ""  # Set your IAM role ARN
   resources:
     limits:
       cpu: 1000m
