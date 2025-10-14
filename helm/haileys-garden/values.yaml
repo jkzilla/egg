@@ -79,7 +79,7 @@ trufflehog:
   enabled: true
   replicaCount: 1
   image:
-    repository: trufflesecurity/trufflehog-enterprise
+    repository: trufflesecurity/trufflehog
     tag: latest
     pullPolicy: IfNotPresent
   service:
