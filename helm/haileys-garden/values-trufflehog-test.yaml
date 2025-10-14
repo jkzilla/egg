@@ -1,0 +1,72 @@
+# Test values for TruffleHog Enterprise deployment
+# Use this file to test TruffleHog without affecting production
+
+# Disable main app for testing
+replicaCount: 0
+
+# Disable Signal API for testing
+signalApi:
+  enabled: false
+
+# Enable TruffleHog Enterprise
+trufflehog:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: trufflesecurity/trufflehog-enterprise
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  ingress:
+    enabled: true
+    host: trufflehog-test.haileysgarden.com
+  database:
+    host: postgres
+    port: 5432
+    name: trufflehog
+    user: trufflehog
+  config:
+    logLevel: debug  # More verbose for testing
+    scanInterval: "15m"  # Faster scans for testing
+    github:
+      enabled: true
+      org: jkzilla
+    slack:
+      enabled: true
+  resources:
+    limits:
+      cpu: 500m  # Lower for testing
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  persistence:
+    enabled: true
+    size: 5Gi  # Smaller for testing
+    storageClass: ""
+
+# PostgreSQL for TruffleHog
+postgresql:
+  enabled: true
+  auth:
+    username: trufflehog
+    password: test-password-change-me
+    database: trufflehog
+  primary:
+    persistence:
+      enabled: true
+      size: 5Gi  # Smaller for testing
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# Disable NGINX Ingress annotations for testing
+ingress:
+  enabled: false
