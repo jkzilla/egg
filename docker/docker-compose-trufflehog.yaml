@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  trufflehog:
+    image: trufflesecurity/trufflehog:latest
+    container_name: trufflehog-dev
+    command: >
+      trufflehog github
+      --repo=https://github.com/jkzilla/egg
+      --json
+      --only-verified
+    volumes:
+      - trufflehog-data:/data
+      - ./results:/results
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
+
+  trufflehog-filesystem:
+    image: trufflesecurity/trufflehog:latest
+    container_name: trufflehog-filesystem
+    command: >
+      trufflehog filesystem
+      /scan
+      --json
+      --only-verified
+    volumes:
+      - ../:/scan:ro
+      - ./results:/results
+    restart: "no"
+    mem_limit: 256m
+    cpus: 0.5
+
+volumes:
+  trufflehog-data:
