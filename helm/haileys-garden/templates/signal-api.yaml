@@ -34,7 +34,9 @@ spec:
           {{- toYaml .Values.signalApi.resources | nindent 10 }}
       volumes:
       - name: signal-data
-        emptyDir: {}
+        hostPath:
+          path: /var/lib/signal-cli
+          type: DirectoryOrCreate
       - name: qr-codes
         hostPath:
           path: /tmp/signal-qr-codes
