@@ -1,0 +1,89 @@
+{{- if .Values.trufflehog.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "haileys-garden.fullname" . }}-trufflehog
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "haileys-garden.labels" . | nindent 4 }}
+    app.kubernetes.io/component: trufflehog
+spec:
+  replicas: {{ .Values.trufflehog.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "haileys-garden.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: trufflehog
+  template:
+    metadata:
+      labels:
+        {{- include "haileys-garden.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: trufflehog
+    spec:
+      containers:
+      - name: trufflehog
+        image: "{{ .Values.trufflehog.image.repository }}:{{ .Values.trufflehog.image.tag }}"
+        imagePullPolicy: {{ .Values.trufflehog.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.trufflehog.service.targetPort }}
+          protocol: TCP
+        env:
+        - name: LOG_LEVEL
+          value: {{ .Values.trufflehog.config.logLevel | quote }}
+        - name: SCAN_INTERVAL
+          value: {{ .Values.trufflehog.config.scanInterval | quote }}
+        - name: DATABASE_HOST
+          value: {{ .Values.trufflehog.database.host | quote }}
+        - name: DATABASE_PORT
+          value: {{ .Values.trufflehog.database.port | quote }}
+        - name: DATABASE_NAME
+          value: {{ .Values.trufflehog.database.name | quote }}
+        - name: DATABASE_USER
+          value: {{ .Values.trufflehog.database.user | quote }}
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "haileys-garden.fullname" . }}-trufflehog-secret
+              key: database-password
+        {{- if .Values.trufflehog.config.github.enabled }}
+        - name: GITHUB_ORG
+          value: {{ .Values.trufflehog.config.github.org | quote }}
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "haileys-garden.fullname" . }}-trufflehog-secret
+              key: github-token
+        {{- end }}
+        {{- if .Values.trufflehog.config.slack.enabled }}
+        - name: SLACK_WEBHOOK_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "haileys-garden.fullname" . }}-trufflehog-secret
+              key: slack-webhook
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          {{- toYaml .Values.trufflehog.resources | nindent 10 }}
+        {{- if .Values.trufflehog.persistence.enabled }}
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        {{- end }}
+      {{- if .Values.trufflehog.persistence.enabled }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ include "haileys-garden.fullname" . }}-trufflehog-pvc
+      {{- end }}
+{{- end }}

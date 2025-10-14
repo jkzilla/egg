@@ -1,0 +1,19 @@
+{{- if and .Values.trufflehog.enabled .Values.trufflehog.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "haileys-garden.fullname" . }}-trufflehog-pvc
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "haileys-garden.labels" . | nindent 4 }}
+    app.kubernetes.io/component: trufflehog
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.trufflehog.persistence.storageClass }}
+  storageClassName: {{ .Values.trufflehog.persistence.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.trufflehog.persistence.size }}
+{{- end }}

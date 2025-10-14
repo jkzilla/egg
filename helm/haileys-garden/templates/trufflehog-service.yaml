@@ -1,0 +1,20 @@
+{{- if .Values.trufflehog.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "haileys-garden.fullname" . }}-trufflehog
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "haileys-garden.labels" . | nindent 4 }}
+    app.kubernetes.io/component: trufflehog
+spec:
+  type: {{ .Values.trufflehog.service.type }}
+  ports:
+  - port: {{ .Values.trufflehog.service.port }}
+    targetPort: {{ .Values.trufflehog.service.targetPort }}
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "haileys-garden.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: trufflehog
+{{- end }}
