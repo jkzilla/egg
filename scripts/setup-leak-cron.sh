@@ -35,5 +35,3 @@ echo "  crontab -l | grep -v 'leak-secrets-cron.sh' | crontab -"
 echo ""
 echo "To view logs:"
 echo "  tail -f $LOG_FILE"
-EOF
-chmod +x /Users/johanna/src/haileysgarden/egg/scripts/setup-leak-cron.sh
