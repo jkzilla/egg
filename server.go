@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/jkzilla/egg/graph"
 	"github.com/jkzilla/egg/graph/model"
+	"github.com/jkzilla/egg/signal"
 	"github.com/rs/cors"
 )
 
@@ -87,6 +88,9 @@ func startServer() {
 	http.Handle("/graphql", corsMiddleware(srv))
 	http.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 
+	// Signal QR code endpoint
+	http.HandleFunc("/api/signal/qrcode", handleQRCode)
+
 	// Serve static files from frontend/dist
 	spa := spaHandler{staticPath: "frontend/dist", indexPath: "index.html"}
 	http.Handle("/", spa)
@@ -99,4 +103,17 @@ func startServer() {
 
 func strPtr(s string) *string {
 	return &s
+}
+
+// handleQRCode serves the Signal QR code for device linking
+func handleQRCode(w http.ResponseWriter, r *http.Request) {
+	qrLink, err := signal.GetQRCode()
+	if err != nil {
+		log.Printf("Error getting QR code: %v", err)
+		http.Error(w, "Failed to get QR code", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write([]byte(qrLink))
 }
