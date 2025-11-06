@@ -1,0 +1,13 @@
+{
+  "key": "npm-dev-local",
+  "rclass": "local",
+  "packageType": "npm",
+  "description": "Local npm repository for Hailey's Garden development packages",
+  "notes": "Store internally developed npm packages and custom builds",
+  "includesPattern": "**/*",
+  "excludesPattern": "",
+  "repoLayoutRef": "npm-default",
+  "xrayIndex": false,
+  "priorityResolution": false,
+  "propertySets": []
+}

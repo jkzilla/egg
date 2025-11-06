@@ -1,0 +1,20 @@
+{
+  "key": "npm",
+  "rclass": "virtual",
+  "packageType": "npm",
+  "description": "Virtual npm repository aggregating local and remote repositories",
+  "notes": "Use this as your primary npm registry endpoint",
+  "includesPattern": "**/*",
+  "excludesPattern": "",
+  "repoLayoutRef": "npm-default",
+  "repositories": [
+    "npm-dev-local",
+    "npmjs-remote"
+  ],
+  "defaultDeploymentRepo": "npm-dev-local",
+  "artifactoryRequestsCanRetrieveRemoteArtifacts": true,
+  "externalDependenciesEnabled": false,
+  "externalDependenciesPatterns": [],
+  "externalDependenciesRemoteRepo": "",
+  "priorityResolution": false
+}

@@ -36,3 +36,8 @@ frontend/playwright/.cache/
 # Netlify Functions
 netlify/functions/node_modules/
 .netlify/
+
+# JFrog Artifactory credentials
+.npmrc
+jfrog/.npmrc
+**/jfrog-token*.txt

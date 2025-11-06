@@ -1,0 +1,27 @@
+# JFrog Artifactory NPM Configuration
+# Copy this file to ~/.npmrc or project root .npmrc and fill in your credentials
+
+# Set the npm registry to use JFrog Artifactory virtual repository
+registry=https://your-instance.jfrog.io/artifactory/api/npm/npm/
+
+# Authentication - Option 1: Using base64 encoded credentials
+# Generate with: echo -n 'username:token' | base64
+#//your-instance.jfrog.io/artifactory/api/npm/npm/:_auth=YOUR_BASE64_ENCODED_CREDENTIALS
+
+# Authentication - Option 2: Using auth token directly
+# Get token from: https://your-instance.jfrog.io/ui/admin/artifactory/user_profile
+#//your-instance.jfrog.io/artifactory/api/npm/npm/:_authToken=YOUR_JFROG_TOKEN
+
+# Authentication - Option 3: Using username and password (less secure)
+#//your-instance.jfrog.io/artifactory/api/npm/npm/:username=YOUR_USERNAME
+#//your-instance.jfrog.io/artifactory/api/npm/npm/:_password=YOUR_BASE64_ENCODED_PASSWORD
+#//your-instance.jfrog.io/artifactory/api/npm/npm/:email=YOUR_EMAIL
+
+# Always authenticate when accessing the registry
+always-auth=true
+
+# Optional: Configure scoped packages
+# @haileys-garden:registry=https://your-instance.jfrog.io/artifactory/api/npm/npm/
+
+# Optional: Disable SSL verification (not recommended for production)
+# strict-ssl=false
