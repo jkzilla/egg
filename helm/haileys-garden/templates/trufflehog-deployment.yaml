@@ -26,6 +26,10 @@ spec:
       - name: trufflehog
         image: "{{ .Values.trufflehog.image.repository }}:{{ .Values.trufflehog.image.tag }}"
         imagePullPolicy: {{ .Values.trufflehog.image.pullPolicy }}
+        command: ["trufflehog"]
+        args:
+        - "enterprise"
+        - "--config=/config/config.yaml"
         ports:
         - name: http
           containerPort: {{ .Values.trufflehog.service.targetPort }}
@@ -84,27 +88,37 @@ spec:
           value: {{ .Values.trufflehog.config.s3.backup.schedule | quote }}
         {{- end }}
         {{- end }}
+        # TruffleHog Enterprise scanner doesn't expose HTTP endpoints
+        # Use exec probe to check if process is running
         livenessProbe:
-          httpGet:
-            path: /health
-            port: http
+          exec:
+            command:
+            - pgrep
+            - trufflehog
           initialDelaySeconds: 30
-          periodSeconds: 10
+          periodSeconds: 30
         readinessProbe:
-          httpGet:
-            path: /ready
-            port: http
-          initialDelaySeconds: 5
-          periodSeconds: 5
+          exec:
+            command:
+            - pgrep
+            - trufflehog
+          initialDelaySeconds: 10
+          periodSeconds: 10
         resources:
           {{- toYaml .Values.trufflehog.resources | nindent 10 }}
-        {{- if .Values.trufflehog.persistence.enabled }}
         volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+        {{- if .Values.trufflehog.persistence.enabled }}
         - name: data
           mountPath: /data
         {{- end }}
-      {{- if .Values.trufflehog.persistence.enabled }}
       volumes:
+      - name: config
+        configMap:
+          name: {{ include "haileys-garden.fullname" . }}-trufflehog-config
+      {{- if .Values.trufflehog.persistence.enabled }}
       - name: data
         persistentVolumeClaim:
           claimName: {{ include "haileys-garden.fullname" . }}-trufflehog-pvc

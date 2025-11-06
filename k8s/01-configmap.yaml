@@ -1,8 +1,0 @@
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: egg-config
-  namespace: haileys-garden
-data:
-  SIGNAL_API_URL: "http://signal-api:8080"
