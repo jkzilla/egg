@@ -2,6 +2,26 @@
 
 This directory contains JFrog Artifactory repository configurations and setup scripts for Hailey's Garden.
 
+## Available Demos
+
+### 🌍 Federated Repositories (NEW!)
+Multi-site replication and global distribution for enterprise teams.
+
+- **[Complete Guide](FEDERATED_REPOS_DEMO.md)** - Full documentation with architecture and use cases
+- **[Quick Start](FEDERATED_DEMO_QUICKSTART.md)** - 5-minute setup guide
+- **[Index](FEDERATED_REPOS_INDEX.md)** - Overview and navigation
+
+**Features:**
+- Real-time artifact replication across multiple JFrog instances
+- Geographic distribution for reduced latency (60-84% faster)
+- Disaster recovery with automatic failover
+- Bi-directional synchronization
+
+### 📦 Basic Demos
+- **[Basic Setup](QUICKSTART.md)** - Get started with npm repositories
+- **[Team Permissions](TEAM_SETUP.md)** - Multi-team access control demo
+- **[Demo Commands](DEMO_COMMANDS.md)** - Step-by-step testing guide
+
 ## Repository Architecture
 
 ```

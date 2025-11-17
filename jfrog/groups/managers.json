@@ -1,0 +1,9 @@
+{
+  "name": "managers",
+  "description": "Team managers who can add/remove users and modify permissions",
+  "autoJoin": false,
+  "adminPrivileges": false,
+  "realm": "internal",
+  "realmAttributes": "",
+  "userNames": ["johanna@haileysgarden.com"]
+}

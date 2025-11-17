@@ -1,0 +1,9 @@
+{
+  "name": "dev-backend",
+  "description": "Backend developers (web-dev-backend1, web-dev-backend2) using npm-shared-local",
+  "autoJoin": false,
+  "adminPrivileges": false,
+  "realm": "internal",
+  "realmAttributes": "",
+  "userNames": ["web-dev-backend1", "web-dev-backend2"]
+}

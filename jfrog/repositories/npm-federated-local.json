@@ -1,0 +1,27 @@
+{
+  "key": "npm-federated",
+  "rclass": "federated",
+  "packageType": "npm",
+  "description": "Federated npm repository with multi-site replication for global development teams",
+  "notes": "Primary federated repository - replicates to US-EAST and EU-WEST instances",
+  "includesPattern": "**/*",
+  "excludesPattern": "*.tmp,*.log,*-SNAPSHOT",
+  "repoLayoutRef": "npm-default",
+  "members": [
+    {
+      "url": "https://us-west.jfrog.io/artifactory/npm-federated",
+      "enabled": true
+    },
+    {
+      "url": "https://us-east.jfrog.io/artifactory/npm-federated",
+      "enabled": true
+    },
+    {
+      "url": "https://eu-west.jfrog.io/artifactory/npm-federated",
+      "enabled": true
+    }
+  ],
+  "xrayIndex": true,
+  "priorityResolution": false,
+  "propertySets": []
+}

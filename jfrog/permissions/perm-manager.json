@@ -1,0 +1,44 @@
+{
+  "name": "perm-manager",
+  "repo": {
+    "include-patterns": ["**"],
+    "exclude-patterns": [],
+    "repositories": ["npmjs-remote", "npm-shared-local"],
+    "actions": {
+      "groups": {
+        "managers": ["read", "write", "annotate", "delete", "manage"]
+      }
+    }
+  },
+  "build": {
+    "include-patterns": ["**"],
+    "exclude-patterns": [],
+    "repositories": ["artifactory-build-info"],
+    "actions": {
+      "groups": {
+        "managers": ["read", "write", "manage"]
+      }
+    }
+  },
+  "releaseBundle": {
+    "include-patterns": ["**"],
+    "exclude-patterns": [],
+    "repositories": [],
+    "actions": {
+      "groups": {}
+    }
+  },
+  "repoPathPermissions": {
+    "npm-shared-local": [
+      {
+        "includePatterns": ["**"],
+        "excludePatterns": [],
+        "actions": {
+          "groups": {
+            "managers": ["read", "annotate", "write", "delete", "manage"]
+          }
+        }
+      }
+    ]
+  }
+}

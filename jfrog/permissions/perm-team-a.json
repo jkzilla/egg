@@ -1,0 +1,42 @@
+{
+  "name": "perm-team-a",
+  "repo": {
+    "include-patterns": ["**"],
+    "exclude-patterns": [],
+    "repositories": ["npmjs-remote", "npm-shared-local"],
+    "actions": {
+      "groups": {
+        "team-a": ["read"]
+      }
+    }
+  },
+  "build": {
+    "include-patterns": ["**"],
+    "exclude-patterns": [],
+    "repositories": ["artifactory-build-info"],
+    "actions": {
+      "groups": {}
+    }
+  },
+  "releaseBundle": {
+    "include-patterns": ["**"],
+    "exclude-patterns": [],
+    "repositories": [],
+    "actions": {
+      "groups": {}
+    }
+  },
+  "repoPathPermissions": {
+    "npm-shared-local": [
+      {
+        "includePatterns": ["@team-a/**", "@shared/**"],
+        "excludePatterns": [],
+        "actions": {
+          "groups": {
+            "team-a": ["read", "annotate", "write", "delete"]
+          }
+        }
+      }
+    ]
+  }
+}

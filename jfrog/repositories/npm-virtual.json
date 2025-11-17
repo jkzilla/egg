@@ -8,10 +8,10 @@
   "excludesPattern": "",
   "repoLayoutRef": "npm-default",
   "repositories": [
-    "npm-dev-local",
+    "npm-shared-local",
     "npmjs-remote"
   ],
-  "defaultDeploymentRepo": "npm-dev-local",
+  "defaultDeploymentRepo": "npm-shared-local",
   "artifactoryRequestsCanRetrieveRemoteArtifacts": true,
   "externalDependenciesEnabled": false,
   "externalDependenciesPatterns": [],

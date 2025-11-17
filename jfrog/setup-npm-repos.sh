@@ -34,7 +34,8 @@ echo "JFrog URL: $JFROG_URL"
 # Function to create repository
 create_repo() {
     local repo_file=$1
-    local repo_name=$(basename "$repo_file" .json)
+    # Extract the key from the JSON file
+    local repo_name=$(grep -o '"key"[[:space:]]*:[[:space:]]*"[^"]*"' "$repo_file" | sed 's/.*"\([^"]*\)".*/\1/')
 
     echo -e "${YELLOW}Creating repository: $repo_name${NC}"
 
@@ -44,8 +45,8 @@ create_repo() {
         -d @"$repo_file" \
         "${JFROG_URL}/api/repositories/${repo_name}")
 
-    http_code=$(echo "$response" | tail -n1)
-    body=$(echo "$response" | head -n-1)
+    http_code=$(echo "$response" | tail -n 1)
+    body=$(echo "$response" | sed '$d')
 
     if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 201 ]; then
         echo -e "${GREEN}✓ Successfully created $repo_name${NC}"

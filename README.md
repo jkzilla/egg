@@ -14,6 +14,21 @@ A full-stack application for selling farm-fresh eggs, featuring a Go 1.25 GraphQ
 - 🐳 **Docker Support**: Easy deployment with multi-stage builds
 - 🔒 **Security Scanning**: TruffleHog integration for secret detection
 - 🔄 **CI/CD Pipeline**: Automated testing and deployment with CircleCI
+- 📦 **JFrog Federated Repos Demo**: Example npm setup with federated Artifactory repositories
+
+## JFrog Federated Repositories
+
+This repo includes a JFrog Artifactory demo that shows how to use **federated npm repositories** for multi-site, geo-distributed teams:
+
+- Single virtual npm endpoint backed by local and remote repos
+- Real-time, bi-directional replication between Artifactory instances
+- Geo-distributed setup for low-latency, resilient installs
+
+For full details, see the JFrog docs in `./jfrog/`:
+
+- [Federated Repos Index](./jfrog/FEDERATED_REPOS_INDEX.md)
+- [Federated Demo Quickstart](./jfrog/FEDERATED_DEMO_QUICKSTART.md)
+- [Complete Federated Guide](./jfrog/FEDERATED_REPOS_DEMO.md)
 
 ## Tech Stack
 

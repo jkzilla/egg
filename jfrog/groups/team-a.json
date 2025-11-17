@@ -1,0 +1,9 @@
+{
+  "name": "team-a",
+  "description": "Team A developers in egg project (user-webdev1, user-webdev2)",
+  "autoJoin": false,
+  "adminPrivileges": false,
+  "realm": "internal",
+  "realmAttributes": "",
+  "userNames": ["user-webdev1", "user-webdev2"]
+}
