@@ -391,6 +391,57 @@ TruffleHog settings are in `.trufflehog.yaml`:
 - Excluded file extensions
 - Verification settings
 
+## Production Operations
+
+The production site runs on an AWS EC2 t2.micro (free tier) with Docker and Caddy for automatic HTTPS.
+
+- **Instance IP**: `50.19.138.45`
+- **Domain**: [https://haileysgarden.com](https://haileysgarden.com)
+- **SSH Key**: `~/.ssh/haileys-garden-key.pem`
+
+### SSH into the Server
+
+```bash
+ssh -i ~/.ssh/haileys-garden-key.pem ubuntu@50.19.138.45
+```
+
+### View Application Logs
+
+```bash
+ssh -i ~/.ssh/haileys-garden-key.pem ubuntu@50.19.138.45 "sudo docker logs -f egg"
+```
+
+### Redeploy After Code Changes
+
+```bash
+ssh -i ~/.ssh/haileys-garden-key.pem ubuntu@50.19.138.45 \
+  "cd ~/egg && git pull && sudo docker build -t egg:latest . && sudo docker rm -f egg && sudo docker run -d --name egg --restart=always -p 8080:8080 egg:latest"
+```
+
+### Restart the Application
+
+```bash
+ssh -i ~/.ssh/haileys-garden-key.pem ubuntu@50.19.138.45 "sudo docker restart egg"
+```
+
+### Check Container Status
+
+```bash
+ssh -i ~/.ssh/haileys-garden-key.pem ubuntu@50.19.138.45 "sudo docker ps && echo '---' && free -h"
+```
+
+### View Caddy (Reverse Proxy / SSL) Logs
+
+```bash
+ssh -i ~/.ssh/haileys-garden-key.pem ubuntu@50.19.138.45 "sudo journalctl -u caddy --no-pager -n 50"
+```
+
+### Restart Caddy
+
+```bash
+ssh -i ~/.ssh/haileys-garden-key.pem ubuntu@50.19.138.45 "sudo systemctl restart caddy"
+```
+
 ## Contributing
 
 1. Fork the repository

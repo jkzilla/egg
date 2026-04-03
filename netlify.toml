@@ -21,15 +21,13 @@
   NODE_VERSION = "20"
 
   # GraphQL API endpoint - update this to your production backend URL
-  VITE_GRAPHQL_ENDPOINT = "https://your-backend-url.com/graphql"
+  VITE_GRAPHQL_ENDPOINT = "https://haileysgarden.com/graphql"
 
 # Redirect all requests to index.html for SPA routing (except functions)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false
-  conditions = {Role = ["public"]}
 
 # Headers for security
 [[headers]]

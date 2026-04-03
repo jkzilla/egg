@@ -22,7 +22,8 @@ func corsMiddleware(next http.Handler) http.Handler {
 		AllowedOrigins: []string{
 			"https://haileysgarden.com",
 			"https://www.haileysgarden.com",
-			"http://localhost:5173", // Local development
+			"https://haileysgarden-preview.netlify.app", // Netlify preview
+			"http://localhost:5173",                      // Local development
 		},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
